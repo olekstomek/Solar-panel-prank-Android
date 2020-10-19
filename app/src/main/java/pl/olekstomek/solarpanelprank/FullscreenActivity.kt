@@ -1,6 +1,5 @@
 package pl.olekstomek.solarpanelprank
 
-import androidx.appcompat.app.AppCompatActivity
 import android.annotation.SuppressLint
 import android.graphics.drawable.AnimationDrawable
 import android.hardware.Sensor
@@ -11,9 +10,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowManager
+import android.view.animation.AnimationSet
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+
 
 class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var fullscreenContent: TextView
@@ -22,7 +27,8 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     private var light: Sensor? = null
-    var batteryAnimationDrawable: AnimationDrawable? = null
+    private var imageView: ImageView? = null
+    private var batteryAnimationDrawable: AnimationDrawable? = null
 
     @SuppressLint("InlinedApi")
     private val hidePart2Runnable = Runnable {
@@ -59,6 +65,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_fullscreen)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         isFullscreen = true
@@ -71,9 +78,30 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        val imageView: ImageView = findViewById<View>(R.id.battery_animation) as ImageView
-        imageView.setBackgroundResource(R.drawable.animation)
-        batteryAnimationDrawable = imageView.background as AnimationDrawable
+        imageView = findViewById<View>(R.id.battery_animation) as ImageView
+        imageView!!.setBackgroundResource(R.drawable.animation)
+        batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+        rotateBattery()
+    }
+
+    private fun rotateBattery() {
+        var rotate = 0f
+        imageView!!.setOnClickListener {
+            val animSet = AnimationSet(true)
+            animSet.interpolator = DecelerateInterpolator()
+            animSet.fillAfter = true
+            animSet.isFillEnabled = true
+
+            val animRotate = RotateAnimation(rotate, rotate + 90.0f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f)
+            animRotate.duration = 200
+            animRotate.fillAfter = true
+            animSet.addAnimation(animRotate)
+            imageView!!.startAnimation(animSet)
+
+            rotate += 90f
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -81,14 +109,14 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         val lightLux = event.values[0]
-        val imageView: ImageView = findViewById<View>(R.id.battery_animation) as ImageView
+        imageView = findViewById<View>(R.id.battery_animation) as ImageView
 
         if (lightLux > 20000.0) {
             batteryAnimationDrawable?.start()
-            imageView.visibility = View.VISIBLE
+            imageView!!.visibility = View.VISIBLE
         } else {
             batteryAnimationDrawable?.stop()
-            imageView.visibility = View.INVISIBLE
+            imageView!!.visibility = View.INVISIBLE
         }
     }
 
