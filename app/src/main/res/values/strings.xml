@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">SolarPanelPrank</string>
     <string name="battery_animation">battery animation</string>
+    <string name="message_on_start">This app is a joke and simulates battery charging depending on the light intensity.
+        Remember not to expose the phone to the sun because it may be damaged!</string>
+    <string name="confirm_understand">OK, I understand</string>
+    <string name="title_message_on_start">Remember that this app is joke!</string>
 </resources>

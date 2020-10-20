@@ -17,8 +17,8 @@ import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
 
 class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var fullscreenContent: TextView
@@ -29,6 +29,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private var light: Sensor? = null
     private var imageView: ImageView? = null
     private var batteryAnimationDrawable: AnimationDrawable? = null
+    private var doubleBackToExitOnce: Boolean = false
 
     @SuppressLint("InlinedApi")
     private val hidePart2Runnable = Runnable {
@@ -69,19 +70,31 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         isFullscreen = true
-
         fullscreenContent = findViewById(R.id.fullscreen_content)
         fullscreenContent.setOnClickListener { toggle() }
-
         fullscreenContentControls = findViewById(R.id.fullscreen_content_controls)
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
         imageView = findViewById<View>(R.id.battery_animation) as ImageView
-        imageView!!.setBackgroundResource(R.drawable.animation)
-        batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+
+        showMessageOnStart()
         rotateBattery()
+    }
+
+    private fun showMessageOnStart() {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder
+                .setMessage(getString(R.string.message_on_start))
+                .setCancelable(false)
+                .setIcon(R.drawable.ic_baseline_wb_sunny_24)
+                .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
+                    closeContextMenu()
+                }
+        val alert = dialogBuilder.create()
+        alert.setTitle(getString(R.string.title_message_on_start))
+        alert.show()
     }
 
     private fun rotateBattery() {
@@ -111,12 +124,23 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         val lightLux = event.values[0]
         imageView = findViewById<View>(R.id.battery_animation) as ImageView
 
-        if (lightLux > 20000.0) {
-            batteryAnimationDrawable?.start()
-            imageView!!.visibility = View.VISIBLE
-        } else {
-            batteryAnimationDrawable?.stop()
-            imageView!!.visibility = View.INVISIBLE
+        when {
+            lightLux > 30_000.0 -> {
+                imageView!!.setBackgroundResource(R.drawable.animation_fast_charging)
+                batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+                batteryAnimationDrawable?.start()
+                imageView!!.visibility = View.VISIBLE
+            }
+            lightLux > 20_000.0 -> {
+                imageView!!.setBackgroundResource(R.drawable.animation_normal_charging)
+                batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+                batteryAnimationDrawable?.start()
+                imageView!!.visibility = View.VISIBLE
+            }
+            else -> {
+                batteryAnimationDrawable?.stop()
+                imageView!!.visibility = View.INVISIBLE
+            }
         }
     }
 
@@ -134,6 +158,16 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         super.onPostCreate(savedInstanceState)
 
         delayedHide(100)
+    }
+
+    override fun onBackPressed() {
+        AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Closing app")
+                .setMessage("Are you sure you want to close this app?")
+                .setPositiveButton("Yes") { _, _ -> finish() }
+                .setNegativeButton("No", null)
+                .show()
     }
 
     private fun toggle() {

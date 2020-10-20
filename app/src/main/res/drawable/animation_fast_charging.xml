@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_20__eb3e19"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_30__ffc300"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_50__a2eb19"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_60__19eb26"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_80__19eb26"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_90__19eb26"
+        android:duration="200" />
+    <item
+        android:drawable="@drawable/ic_round_battery_charging_full__19eb26"
+        android:duration="200" />
+</animation-list>
