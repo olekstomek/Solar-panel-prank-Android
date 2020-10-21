@@ -1,16 +1,16 @@
 package pl.olekstomek.solarpanelprank
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.drawable.AnimationDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import android.view.animation.AnimationSet
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
@@ -26,10 +26,9 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private val hideHandler = Handler()
 
     private lateinit var sensorManager: SensorManager
-    private var light: Sensor? = null
-    private var imageView: ImageView? = null
+    private var lightSensor: Sensor? = null
+    private var batteryAnimation: ImageView? = null
     private var batteryAnimationDrawable: AnimationDrawable? = null
-    private var doubleBackToExitOnce: Boolean = false
 
     @SuppressLint("InlinedApi")
     private val hidePart2Runnable = Runnable {
@@ -75,46 +74,12 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         fullscreenContentControls = findViewById(R.id.fullscreen_content_controls)
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-        imageView = findViewById<View>(R.id.battery_animation) as ImageView
+        batteryAnimation = findViewById<View>(R.id.battery_animation) as ImageView
 
         showMessageOnStart()
         rotateBattery()
-    }
-
-    private fun showMessageOnStart() {
-        val dialogBuilder = AlertDialog.Builder(this)
-        dialogBuilder
-                .setMessage(getString(R.string.message_on_start))
-                .setCancelable(false)
-                .setIcon(R.drawable.ic_baseline_wb_sunny_24)
-                .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
-                    closeContextMenu()
-                }
-        val alert = dialogBuilder.create()
-        alert.setTitle(getString(R.string.title_message_on_start))
-        alert.show()
-    }
-
-    private fun rotateBattery() {
-        var rotate = 0f
-        imageView!!.setOnClickListener {
-            val animSet = AnimationSet(true)
-            animSet.interpolator = DecelerateInterpolator()
-            animSet.fillAfter = true
-            animSet.isFillEnabled = true
-
-            val animRotate = RotateAnimation(rotate, rotate + 90.0f,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f)
-            animRotate.duration = 200
-            animRotate.fillAfter = true
-            animSet.addAnimation(animRotate)
-            imageView!!.startAnimation(animSet)
-
-            rotate += 90f
-        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -122,31 +87,31 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         val lightLux = event.values[0]
-        imageView = findViewById<View>(R.id.battery_animation) as ImageView
+        batteryAnimation = findViewById<View>(R.id.battery_animation) as ImageView
 
         when {
             lightLux > 30_000.0 -> {
-                imageView!!.setBackgroundResource(R.drawable.animation_fast_charging)
-                batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+                batteryAnimation!!.setBackgroundResource(R.drawable.animation_fast_charging)
+                batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
-                imageView!!.visibility = View.VISIBLE
+                batteryAnimation!!.visibility = View.VISIBLE
             }
             lightLux > 20_000.0 -> {
-                imageView!!.setBackgroundResource(R.drawable.animation_normal_charging)
-                batteryAnimationDrawable = imageView!!.background as AnimationDrawable
+                batteryAnimation!!.setBackgroundResource(R.drawable.animation_normal_charging)
+                batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
-                imageView!!.visibility = View.VISIBLE
+                batteryAnimation!!.visibility = View.VISIBLE
             }
             else -> {
                 batteryAnimationDrawable?.stop()
-                imageView!!.visibility = View.INVISIBLE
+                batteryAnimation!!.visibility = View.INVISIBLE
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        sensorManager.registerListener(this, light, SensorManager.SENSOR_DELAY_FASTEST)
+        sensorManager.registerListener(this, lightSensor, SensorManager.SENSOR_DELAY_FASTEST)
     }
 
     override fun onPause() {
@@ -168,6 +133,93 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                 .setPositiveButton("Yes") { _, _ -> finish() }
                 .setNegativeButton("No", null)
                 .show()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu, menu)
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when (item.itemId) {
+            R.id.change_background_to_solar_1 -> {
+                fullscreenContent.setBackgroundResource(R.drawable.solar_panel_1)
+                return true
+            }
+            R.id.change_background_to_solar_2 -> {
+                fullscreenContent.setBackgroundResource(R.drawable.solar_panel_2)
+                return true
+            }
+            R.id.change_background_to_solar_3 -> {
+                fullscreenContent.setBackgroundResource(R.drawable.solar_panel_3)
+                return true
+            }
+            R.id.action_open_github -> {
+                startActivity(
+                        Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(getString(R.string.link_to_GitHub))
+                        )
+                )
+
+                return true
+            }
+            R.id.action_issues -> {
+                startActivity(
+                        Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(getString(R.string.link_to_issues))
+                        )
+                )
+            }
+
+            R.id.action_open_google_play -> {
+                startActivity(
+                        Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(getString(R.string.link_to_GooglePlay))
+                        )
+                )
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showMessageOnStart() {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder
+                .setMessage(getString(R.string.message_on_start))
+                .setCancelable(false)
+                .setIcon(R.drawable.ic_baseline_wb_sunny_24)
+                .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
+                    closeContextMenu()
+                }
+        val alert = dialogBuilder.create()
+        alert.setTitle(getString(R.string.title_message_on_start))
+        alert.show()
+    }
+
+    private fun rotateBattery() {
+        var rotate = 0f
+        batteryAnimation!!.setOnClickListener {
+            val animSet = AnimationSet(true)
+            animSet.interpolator = DecelerateInterpolator()
+            animSet.fillAfter = true
+            animSet.isFillEnabled = true
+
+            val animRotate = RotateAnimation(rotate, rotate + 90.0f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                    RotateAnimation.RELATIVE_TO_SELF, 0.5f)
+            animRotate.duration = 200
+            animRotate.fillAfter = true
+            animSet.addAnimation(animRotate)
+            batteryAnimation!!.startAnimation(animSet)
+
+            rotate += 90f
+        }
     }
 
     private fun toggle() {
