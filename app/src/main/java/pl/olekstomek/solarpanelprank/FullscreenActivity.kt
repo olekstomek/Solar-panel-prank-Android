@@ -16,12 +16,11 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
 class FullscreenActivity : AppCompatActivity(), SensorEventListener {
-    private lateinit var fullscreenContent: TextView
+    private lateinit var fullscreenContent: ImageView
     private lateinit var fullscreenContentControls: LinearLayout
     private val hideHandler = Handler()
 
@@ -33,12 +32,12 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     @SuppressLint("InlinedApi")
     private val hidePart2Runnable = Runnable {
         fullscreenContent.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
     private val showPart2Runnable = Runnable {
         supportActionBar?.show()
@@ -66,7 +65,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
         setContentView(R.layout.activity_fullscreen)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         isFullscreen = true
         fullscreenContent = findViewById(R.id.fullscreen_content)
@@ -103,8 +101,10 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                 batteryAnimation!!.visibility = View.VISIBLE
             }
             else -> {
-                batteryAnimationDrawable?.stop()
-                batteryAnimation!!.visibility = View.INVISIBLE
+                batteryAnimation!!.setBackgroundResource(R.drawable.animation_not_charging)
+                batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
+                batteryAnimationDrawable?.start()
+                batteryAnimation!!.visibility = View.VISIBLE
             }
         }
     }
@@ -127,12 +127,12 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onBackPressed() {
         AlertDialog.Builder(this)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .setTitle("Closing app")
-                .setMessage("Are you sure you want to close this app?")
-                .setPositiveButton("Yes") { _, _ -> finish() }
-                .setNegativeButton("No", null)
-                .show()
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Closing app")
+            .setMessage("Are you sure you want to close this app?")
+            .setPositiveButton("Yes") { _, _ -> finish() }
+            .setNegativeButton("No", null)
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -158,29 +158,29 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
             }
             R.id.action_open_github -> {
                 startActivity(
-                        Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(getString(R.string.link_to_GitHub))
-                        )
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(getString(R.string.link_to_GitHub))
+                    )
                 )
 
                 return true
             }
             R.id.action_issues -> {
                 startActivity(
-                        Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(getString(R.string.link_to_issues))
-                        )
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(getString(R.string.link_to_issues))
+                    )
                 )
             }
 
             R.id.action_open_google_play -> {
                 startActivity(
-                        Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(getString(R.string.link_to_GooglePlay))
-                        )
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse(getString(R.string.link_to_GooglePlay))
+                    )
                 )
             }
         }
@@ -191,12 +191,12 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private fun showMessageOnStart() {
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder
-                .setMessage(getString(R.string.message_on_start))
-                .setCancelable(false)
-                .setIcon(R.drawable.ic_baseline_wb_sunny_24)
-                .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
-                    closeContextMenu()
-                }
+            .setMessage(getString(R.string.message_on_start))
+            .setCancelable(false)
+            .setIcon(R.drawable.ic_baseline_wb_sunny_24)
+            .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
+                closeContextMenu()
+            }
         val alert = dialogBuilder.create()
         alert.setTitle(getString(R.string.title_message_on_start))
         alert.show()
@@ -210,9 +210,11 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
             animSet.fillAfter = true
             animSet.isFillEnabled = true
 
-            val animRotate = RotateAnimation(rotate, rotate + 90.0f,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f,
-                    RotateAnimation.RELATIVE_TO_SELF, 0.5f)
+            val animRotate = RotateAnimation(
+                rotate, rotate + 90.0f,
+                RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+                RotateAnimation.RELATIVE_TO_SELF, 0.5f
+            )
             animRotate.duration = 200
             animRotate.fillAfter = true
             animSet.addAnimation(animRotate)
@@ -241,8 +243,8 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     private fun show() {
         fullscreenContent.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         isFullscreen = true
 
         hideHandler.removeCallbacks(hidePart2Runnable)

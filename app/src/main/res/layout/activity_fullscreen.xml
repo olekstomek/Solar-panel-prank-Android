@@ -23,7 +23,7 @@
         </LinearLayout>
     </FrameLayout>
 
-    <TextView
+    <ImageView
         android:id="@+id/fullscreen_content"
         android:background="@drawable/solar_panel_1"
         android:layout_width="match_parent"
