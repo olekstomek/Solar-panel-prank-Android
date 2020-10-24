@@ -28,7 +28,8 @@
         android:background="@drawable/solar_panel_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:keepScreenOn="true" />
+        android:keepScreenOn="true"
+        android:contentDescription="@string/solar_panel_image" />
 
     <ImageView
         android:id="@+id/battery_animation"

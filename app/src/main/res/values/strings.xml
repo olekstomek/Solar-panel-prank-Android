@@ -15,4 +15,5 @@
     <string name="change_background_to_solar_2">Change solar panel 2</string>
     <string name="change_background_to_solar_3">Change solar panel 3</string>
     <string name="battery_level">Battery level</string>
+    <string name="solar_panel_image">solar panel image</string>
 </resources>

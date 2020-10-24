@@ -63,7 +63,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         false
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
