@@ -2,12 +2,14 @@ package pl.olekstomek.solarpanelprank
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.AnimationDrawable
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
@@ -16,6 +18,8 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
@@ -78,7 +82,39 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
         showMessageOnStart()
         rotateBattery()
+        showBatteryLevel()
     }
+
+    private fun showBatteryLevel() {
+
+        val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        val batteryStatus = registerReceiver(null, intentFilter)
+
+        val level = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+
+        val battery = level / scale.toFloat()
+        val batteryPercentage = (battery * 100).toInt()
+
+        val inflater = layoutInflater
+        val layout = inflater.inflate(
+            R.layout.custom_toast,
+            findViewById(R.id.custom_toast_layout)
+        )
+
+        val text: TextView = layout.findViewById(R.id.text)
+        text.text = getString(R.string.battery_level)
+            .plus(" ")
+            .plus(batteryPercentage)
+            .plus("%")
+
+        val toast = Toast(this@FullscreenActivity.applicationContext)
+        toast.setGravity(Gravity.BOTTOM, 0, 0)
+        toast.duration = Toast.LENGTH_LONG
+        toast.view = layout
+        toast.show()
+    }
+
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
     }
