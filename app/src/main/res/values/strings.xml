@@ -16,4 +16,6 @@
     <string name="change_background_to_solar_3">Change solar panel 3</string>
     <string name="battery_level">Battery level</string>
     <string name="solar_panel_image">solar panel image</string>
+    <string name="don_t_show_again_this_warning">Don\'t show again this warning!</string>
+    <string name="warnings">Warnings</string>
 </resources>

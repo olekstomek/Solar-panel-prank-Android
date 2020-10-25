@@ -1,6 +1,7 @@
 package pl.olekstomek.solarpanelprank
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.drawable.AnimationDrawable
@@ -16,10 +17,7 @@ import android.view.*
 import android.view.animation.AnimationSet
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 
@@ -79,7 +77,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
         batteryAnimation = findViewById<View>(R.id.battery_animation) as ImageView
 
-        showMessageOnStart()
+        showWarningMessageOnStart()
         rotateBattery()
         showBatteryLevel()
     }
@@ -160,16 +158,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         delayedHide(100)
     }
 
-    override fun onBackPressed() {
-        AlertDialog.Builder(this)
-            .setIcon(android.R.drawable.ic_dialog_alert)
-            .setTitle("Closing app")
-            .setMessage("Are you sure you want to close this app?")
-            .setPositiveButton("Yes") { _, _ -> finish() }
-            .setNegativeButton("No", null)
-            .show()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu, menu)
 
@@ -179,6 +167,9 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
+            R.id.warnings -> {
+                createWarningMessageOnStart()
+            }
             R.id.change_background_to_solar_1 -> {
                 fullscreenContent.setBackgroundResource(R.drawable.solar_panel_1)
                 return true
@@ -223,18 +214,64 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun showMessageOnStart() {
+    private fun showWarningMessageOnStart() {
+        if (loadSavingChoiceDontShowAlertOnStart())
+            return
+
+        createWarningMessageOnStart()
+    }
+
+    private fun createWarningMessageOnStart() {
+        val inflater = layoutInflater
+        val inflateView = inflater.inflate(R.layout.checbox_in_alert, null)
+        val checkBoxToggle = inflateView.findViewById(R.id.show_alert_check) as CheckBox
+        checkBoxToggle.isChecked = loadSavingChoiceDontShowAlertOnStart()
+
+        checkBoxToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                saveChoiceShowingAlertOnStart(isChecked)
+                Toast.makeText(
+                    this@FullscreenActivity,
+                    "Alert will be not show again",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                saveChoiceShowingAlertOnStart(isChecked)
+                Toast.makeText(
+                    this@FullscreenActivity,
+                    "Alert will be show again",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder
+            .setTitle(getString(R.string.title_message_on_start))
             .setMessage(getString(R.string.message_on_start))
-            .setCancelable(false)
             .setIcon(R.drawable.ic_baseline_wb_sunny_24)
             .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
                 closeContextMenu()
             }
+            .setView(inflateView)
+            .setCancelable(false)
         val alert = dialogBuilder.create()
-        alert.setTitle(getString(R.string.title_message_on_start))
         alert.show()
+    }
+
+    private fun saveChoiceShowingAlertOnStart(isChecked: Boolean) {
+        val sharedPreferences = getSharedPreferences("sharedPreferenes", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        editor.apply {
+            putBoolean("BOOLEAN_KEY", isChecked)
+        }.apply()
+    }
+
+    private fun loadSavingChoiceDontShowAlertOnStart(): Boolean {
+        val sharedPreferences = getSharedPreferences("sharedPreferenes", Context.MODE_PRIVATE)
+
+        return sharedPreferences.getBoolean("BOOLEAN_KEY", false)
     }
 
     private fun rotateBattery() {
