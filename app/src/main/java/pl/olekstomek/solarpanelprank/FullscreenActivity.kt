@@ -121,13 +121,13 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         batteryAnimation = findViewById<View>(R.id.battery_animation) as ImageView
 
         when {
-            lightLux > 30_000.0 -> {
+            lightLux > 45.0 -> {
                 batteryAnimation!!.setBackgroundResource(R.drawable.animation_fast_charging)
                 batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
                 batteryAnimation!!.visibility = View.VISIBLE
             }
-            lightLux > 20_000.0 -> {
+            lightLux > 20.0 -> {
                 batteryAnimation!!.setBackgroundResource(R.drawable.animation_normal_charging)
                 batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
