@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="pl.olekstomek.solarpanelprank">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="pl.olekstomek.solarcharger">
+
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -8,12 +12,12 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SolarPanelPrank">
+        android:theme="@style/Theme.SolarCharger">
         <activity
-            android:name=".FullscreenActivity"
+            android:name="pl.olekstomek.solarcharger.FullscreenActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
-            android:theme="@style/Theme.SolarPanelPrank.Fullscreen">
+            android:theme="@style/Theme.SolarCharger.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

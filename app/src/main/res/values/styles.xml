@@ -1,10 +1,10 @@
 <resources>
 
-    <style name="Widget.Theme.SolarPanelPrank.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
+    <style name="Widget.Theme.SolarCharger.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
 
-    <style name="Widget.Theme.SolarPanelPrank.ButtonBar.Fullscreen" parent="">
+    <style name="Widget.Theme.SolarCharger.ButtonBar.Fullscreen" parent="">
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>

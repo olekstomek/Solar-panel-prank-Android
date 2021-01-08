@@ -11,4 +11,20 @@
         android:padding="1dp"
         android:layout_margin="10dp"
         android:orientation="horizontal" />
+    <CheckBox
+        android:id="@+id/show_allow_brightness_manage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/allow_to_manage_screen_brightness"
+        android:padding="1dp"
+        android:layout_margin="10dp"
+        android:orientation="horizontal" />
+    <CheckBox
+        android:id="@+id/keep_screen_on"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/keep_screen_on"
+        android:padding="1dp"
+        android:layout_margin="10dp"
+        android:orientation="horizontal" />
 </LinearLayout>

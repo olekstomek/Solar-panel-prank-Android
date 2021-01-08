@@ -1,4 +1,4 @@
-package pl.olekstomek.solarpanelprank
+package pl.olekstomek.solarcharger
 
 import org.junit.Test
 

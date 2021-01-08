@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/ThemeOverlay.SolarPanelPrank.FullscreenContainer"
+    android:theme="@style/ThemeOverlay.SolarCharger.FullscreenContainer"
     tools:context=".FullscreenActivity">
 
     <FrameLayout
@@ -13,7 +13,7 @@
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
-            style="@style/Widget.Theme.SolarPanelPrank.ButtonBar.Fullscreen"
+            style="@style/Widget.Theme.SolarCharger.ButtonBar.Fullscreen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
@@ -28,7 +28,6 @@
         android:background="@drawable/solar_panel_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:keepScreenOn="true"
         android:contentDescription="@string/solar_panel_image" />
 
     <ImageView

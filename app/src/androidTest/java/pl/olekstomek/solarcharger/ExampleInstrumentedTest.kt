@@ -1,4 +1,4 @@
-package pl.olekstomek.solarpanelprank
+package pl.olekstomek.solarcharger
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("pl.olekstomek.solarpanelprank", appContext.packageName)
+        assertEquals("pl.olekstomek.solarpanelchargingprank", appContext.packageName)
     }
 }

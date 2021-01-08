@@ -1,4 +1,4 @@
-package pl.olekstomek.solarpanelprank
+package pl.olekstomek.solarcharger
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -11,15 +11,18 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.net.Uri
 import android.os.BatteryManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
+import android.view.View.*
 import android.view.animation.AnimationSet
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.annotation.RequiresApi
 
 class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var fullscreenContent: ImageView
@@ -30,33 +33,32 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     private var lightSensor: Sensor? = null
     private var batteryAnimation: ImageView? = null
     private var batteryAnimationDrawable: AnimationDrawable? = null
+    private val brightnessScreen = BrightnessScreen()
 
     @SuppressLint("InlinedApi")
     private val hidePart2Runnable = Runnable {
         fullscreenContent.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                    View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            SYSTEM_UI_FLAG_LOW_PROFILE or
+                    SYSTEM_UI_FLAG_FULLSCREEN or
+                    SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
     private val showPart2Runnable = Runnable {
         supportActionBar?.show()
-        fullscreenContentControls.visibility = View.VISIBLE
+        fullscreenContentControls.visibility = VISIBLE
     }
     private var isFullscreen: Boolean = false
 
     private val hideRunnable = Runnable { hide() }
 
-    private val delayHideTouchListener = View.OnTouchListener { view, motionEvent ->
+    private val delayHideTouchListener = OnTouchListener { view, motionEvent ->
         when (motionEvent.action) {
             MotionEvent.ACTION_DOWN -> if (AUTO_HIDE) {
                 delayedHide(AUTO_HIDE_DELAY_MILLIS)
             }
             MotionEvent.ACTION_UP -> view.performClick()
-            else -> {
-            }
         }
         false
     }
@@ -65,7 +67,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_fullscreen)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         isFullscreen = true
         fullscreenContent = findViewById(R.id.fullscreen_content)
@@ -80,42 +81,10 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         showWarningMessageOnStart()
         rotateBattery()
         showBatteryLevel()
+        keepScreenOn()
     }
 
-    private fun showBatteryLevel() {
-
-        val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
-        val batteryStatus = registerReceiver(null, intentFilter)
-
-        val level = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
-        val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
-
-        val battery = level / scale.toFloat()
-        val batteryPercentage = (battery * 100).toInt()
-
-        val inflater = layoutInflater
-        val layout = inflater.inflate(
-            R.layout.custom_toast,
-            findViewById(R.id.custom_toast_layout)
-        )
-
-        val text: TextView = layout.findViewById(R.id.text)
-        text.text = getString(R.string.battery_level)
-            .plus(" ")
-            .plus(batteryPercentage)
-            .plus("%")
-
-        val toast = Toast(this@FullscreenActivity.applicationContext)
-        toast.setGravity(Gravity.BOTTOM, 0, 0)
-        toast.duration = Toast.LENGTH_LONG
-        toast.view = layout
-        toast.show()
-    }
-
-
-    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-    }
-
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onSensorChanged(event: SensorEvent) {
         val lightLux = event.values[0]
         batteryAnimation = findViewById<View>(R.id.battery_animation) as ImageView
@@ -125,21 +94,29 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                 batteryAnimation!!.setBackgroundResource(R.drawable.animation_fast_charging)
                 batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
-                batteryAnimation!!.visibility = View.VISIBLE
+                batteryAnimation!!.visibility = VISIBLE
             }
             lightLux > 20.0 -> {
                 batteryAnimation!!.setBackgroundResource(R.drawable.animation_normal_charging)
                 batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
-                batteryAnimation!!.visibility = View.VISIBLE
+                batteryAnimation!!.visibility = VISIBLE
             }
             else -> {
                 batteryAnimation!!.setBackgroundResource(R.drawable.animation_not_charging)
                 batteryAnimationDrawable = batteryAnimation!!.background as AnimationDrawable
                 batteryAnimationDrawable?.start()
-                batteryAnimation!!.visibility = View.VISIBLE
+                batteryAnimation!!.visibility = VISIBLE
             }
         }
+
+        if (checkBrightnessManage()) {
+            brightnessScreen.changeBrightnessScreen(lightLux, this@FullscreenActivity.applicationContext)
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
     }
 
     override fun onResume() {
@@ -167,8 +144,8 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
-            R.id.warnings -> {
-                createWarningMessageOnStart()
+            R.id.settings -> {
+                settings()
             }
             R.id.change_background_to_solar_1 -> {
                 fullscreenContent.setBackgroundResource(R.drawable.solar_panel_1)
@@ -214,44 +191,117 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun showWarningMessageOnStart() {
-        if (loadSavingChoiceDontShowAlertOnStart())
-            return
+    private fun showBatteryLevel() {
+        val intentFilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        val batteryStatus = registerReceiver(null, intentFilter)
 
-        createWarningMessageOnStart()
+        val level = batteryStatus!!.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
+        val scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1)
+
+        val battery = level / scale.toFloat()
+        val batteryPercentage = (battery * 100).toInt()
+
+        val inflater = layoutInflater
+        val layout = inflater.inflate(
+            R.layout.custom_toast,
+            findViewById(R.id.custom_toast_layout)
+        )
+
+        val text: TextView = layout.findViewById(R.id.text)
+        text.text = getString(R.string.battery_level)
+            .plus(" ")
+            .plus(batteryPercentage)
+            .plus("%")
+
+        val toast = Toast(this@FullscreenActivity.applicationContext)
+        toast.setGravity(Gravity.BOTTOM, 0, 0)
+        toast.duration = Toast.LENGTH_LONG
+        toast.view = layout
+        toast.show()
     }
 
-    private fun createWarningMessageOnStart() {
+    private fun keepScreenOn() {
+        if (loadSavingChoiceKeepScreenOn()) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
+    private fun showWarningMessageOnStart() {
+        if (loadSavingChoiceDoNotShowAlertOnStart())
+            return
+
+        settings()
+    }
+
+    private fun checkBrightnessManage(): Boolean {
+        return loadSavingChoiceBrightnessManage()
+    }
+
+    private fun settings() {
         val inflater = layoutInflater
         val inflateView = inflater.inflate(R.layout.checbox_in_alert, null)
-        val checkBoxToggle = inflateView.findViewById(R.id.show_alert_check) as CheckBox
-        checkBoxToggle.isChecked = loadSavingChoiceDontShowAlertOnStart()
+        val checkBoxToggleAlertCheck = inflateView.findViewById(R.id.show_alert_check) as CheckBox
+        val checkBoxToggleBrightnessManage =
+            inflateView.findViewById(R.id.show_allow_brightness_manage) as CheckBox
+        val checkBoxToggleKeepScreenOn =
+            inflateView.findViewById(R.id.keep_screen_on) as CheckBox
+        checkBoxToggleAlertCheck.isChecked = loadSavingChoiceDoNotShowAlertOnStart()
+        checkBoxToggleBrightnessManage.isChecked = loadSavingChoiceBrightnessManage()
+        checkBoxToggleKeepScreenOn.isChecked = loadSavingChoiceKeepScreenOn()
+        val settingsMap: MutableMap<String, Boolean> = mutableMapOf()
+        settingsMap["isCheckedAlert"] = checkBoxToggleAlertCheck.isChecked
+        settingsMap["isCheckedBrightnessManage"] = checkBoxToggleBrightnessManage.isChecked
+        settingsMap["isCheckedKeepScreenOn"] = checkBoxToggleKeepScreenOn.isChecked
 
-        checkBoxToggle.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                saveChoiceShowingAlertOnStart(isChecked)
-                Toast.makeText(
-                    this@FullscreenActivity,
-                    "Alert will be not show again",
-                    Toast.LENGTH_SHORT
-                ).show()
+        checkBoxToggleAlertCheck.setOnCheckedChangeListener { _, isCheckedAlert ->
+            settingsMap["isCheckedAlert"] = isCheckedAlert
+            if (isCheckedAlert) {
+                makeToast(R.string.alert_disabled)
             } else {
-                saveChoiceShowingAlertOnStart(isChecked)
-                Toast.makeText(
-                    this@FullscreenActivity,
-                    "Alert will be show again",
-                    Toast.LENGTH_SHORT
-                ).show()
+                makeToast(R.string.alert_enabled)
             }
         }
 
+        checkBoxToggleBrightnessManage.setOnCheckedChangeListener { _, isCheckedBrightnessManage ->
+            settingsMap["isCheckedBrightnessManage"] = isCheckedBrightnessManage
+            if (isCheckedBrightnessManage) {
+                makeToast(R.string.brightness_enabled)
+            } else {
+                makeToast(R.string.brightness_disabled)
+            }
+        }
+
+        checkBoxToggleKeepScreenOn.setOnCheckedChangeListener { _, isCheckedKeepScreenOn ->
+            settingsMap["isCheckedKeepScreenOn"] = isCheckedKeepScreenOn
+            if (isCheckedKeepScreenOn) {
+                makeToast(R.string.keep_screen_on_enabled)
+            } else {
+                makeToast(R.string.keep_screen_on_disabled)
+            }
+        }
+
+        showOptions(settingsMap, inflateView)
+    }
+
+    private fun showOptions(
+        settingsMap: MutableMap<String, Boolean>,
+        inflateView: View?
+    ) {
         val dialogBuilder = AlertDialog.Builder(this)
         dialogBuilder
             .setTitle(getString(R.string.title_message_on_start))
             .setMessage(getString(R.string.message_on_start))
             .setIcon(R.drawable.ic_baseline_wb_sunny_24)
-            .setPositiveButton(getString(R.string.confirm_understand)) { _, _ ->
+            .setPositiveButton(getString(R.string.confirm_and_save)) { _, _ ->
+                saveChoiceInSettings(settingsMap)
+                makeToast(R.string.saved)
                 closeContextMenu()
+            }
+            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                closeContextMenu()
+                makeToast(R.string.canceled)
             }
             .setView(inflateView)
             .setCancelable(false)
@@ -259,19 +309,44 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         alert.show()
     }
 
-    private fun saveChoiceShowingAlertOnStart(isChecked: Boolean) {
-        val sharedPreferences = getSharedPreferences("sharedPreferenes", Context.MODE_PRIVATE)
+    private fun makeToast(brightnessDisabled: Int) {
+        Toast.makeText(
+            this@FullscreenActivity,
+            getString(brightnessDisabled),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun saveChoiceInSettings(settingsMap: MutableMap<String, Boolean>) {
+        val sharedPreferences = getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
 
         editor.apply {
-            putBoolean("BOOLEAN_KEY", isChecked)
+            putBoolean("BOOLEAN_KEY_SHOW_ALERT", settingsMap["isCheckedAlert"] == true)
+            putBoolean(
+                "BOOLEAN_KEY_BRIGHTNESS_MANAGE",
+                settingsMap["isCheckedBrightnessManage"] == true
+            )
+            putBoolean("BOOLEAN_KEY_KEEP_SCREEN_ON", settingsMap["isCheckedKeepScreenOn"] == true)
         }.apply()
     }
 
-    private fun loadSavingChoiceDontShowAlertOnStart(): Boolean {
-        val sharedPreferences = getSharedPreferences("sharedPreferenes", Context.MODE_PRIVATE)
+    private fun loadSavingChoiceDoNotShowAlertOnStart(): Boolean {
+        val sharedPreferences = getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE)
 
-        return sharedPreferences.getBoolean("BOOLEAN_KEY", false)
+        return sharedPreferences.getBoolean("BOOLEAN_KEY_SHOW_ALERT", false)
+    }
+
+    private fun loadSavingChoiceBrightnessManage(): Boolean {
+        val sharedPreferences = getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE)
+
+        return sharedPreferences.getBoolean("BOOLEAN_KEY_BRIGHTNESS_MANAGE", false)
+    }
+
+    private fun loadSavingChoiceKeepScreenOn(): Boolean {
+        val sharedPreferences = getSharedPreferences("sharedPreferences", Context.MODE_PRIVATE)
+
+        return sharedPreferences.getBoolean("BOOLEAN_KEY_KEEP_SCREEN_ON", false)
     }
 
     private fun rotateBattery() {
@@ -306,7 +381,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     private fun hide() {
         supportActionBar?.hide()
-        fullscreenContentControls.visibility = View.GONE
+        fullscreenContentControls.visibility = GONE
         isFullscreen = false
 
         hideHandler.removeCallbacks(showPart2Runnable)
@@ -315,8 +390,8 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
 
     private fun show() {
         fullscreenContent.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                    SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         isFullscreen = true
 
         hideHandler.removeCallbacks(hidePart2Runnable)
