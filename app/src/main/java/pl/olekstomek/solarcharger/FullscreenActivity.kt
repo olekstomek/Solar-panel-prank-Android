@@ -146,6 +146,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
         when (item.itemId) {
             R.id.settings -> {
                 settings()
+                return true
             }
             R.id.change_background_to_solar_1 -> {
                 fullscreenContent.setBackgroundResource(R.drawable.solar_panel_1)
@@ -166,7 +167,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                         Uri.parse(getString(R.string.link_to_GitHub))
                     )
                 )
-
                 return true
             }
             R.id.action_issues -> {
@@ -176,6 +176,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                         Uri.parse(getString(R.string.link_to_issues))
                     )
                 )
+                return true
             }
 
             R.id.action_open_google_play -> {
@@ -185,6 +186,7 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                         Uri.parse(getString(R.string.link_to_GooglePlay))
                     )
                 )
+                return true
             }
         }
 
