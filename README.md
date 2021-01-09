@@ -1,7 +1,7 @@
 # Solar-panel-prank-Android
 An Android application that reacts to light levels and simulates battery charging
 
-![pjimage](https://user-images.githubusercontent.com/26818304/104095461-305ef180-5297-11eb-9e46-cf1815060763.jpg)
+Check video:
 
 [![Solar panel prank Android](http://img.youtube.com/vi/qHGJpQYYuLQ/0.jpg)](http://www.youtube.com/watch?v=qHGJpQYYuLQ "Solar panel prank Android")
 
@@ -12,3 +12,5 @@ You can change the graphics of the solar panel - it does not affect the behavior
 The application can manage the brightness of your smartphone screen, but you can also turn it off. The brightness adjustment is based on the fact that the brighter the surroundings, the brighter your smartphone screen will be. The darker the environment, the darker your smartphone screen will be.
 
 You can also set the option that the screen does not turn off automatically after a certain time in your operating system (restart the application).
+
+![pjimage](https://user-images.githubusercontent.com/26818304/104095461-305ef180-5297-11eb-9e46-cf1815060763.jpg)
