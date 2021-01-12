@@ -1,6 +1,8 @@
 # Solar-panel-prank-Android
 An Android application that reacts to light levels and simulates battery charging
 
+[App available in Huawei AppGallery](https://appgallery.huawei.com/#/app/C103659141)
+
 Check video:
 
 [![Solar panel prank Android](http://img.youtube.com/vi/qHGJpQYYuLQ/0.jpg)](http://www.youtube.com/watch?v=qHGJpQYYuLQ "Solar panel prank Android")

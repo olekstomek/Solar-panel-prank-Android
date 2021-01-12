@@ -178,16 +178,6 @@ class FullscreenActivity : AppCompatActivity(), SensorEventListener {
                 )
                 return true
             }
-
-            R.id.action_open_google_play -> {
-                startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(getString(R.string.link_to_GooglePlay))
-                    )
-                )
-                return true
-            }
         }
 
         return super.onOptionsItemSelected(item)
